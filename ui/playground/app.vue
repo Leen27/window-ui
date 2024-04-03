@@ -2,7 +2,7 @@
   <div>
     Nuxt module playground!
     <div>
-      <w-button class="bg-red-700">
+      <w-button>
         a123123
       </w-button>
     </div>

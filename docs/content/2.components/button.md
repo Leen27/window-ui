@@ -14,6 +14,25 @@ code: WButton
 WButton
 ::
 
-::w-button
-4444
+You can also use the `label` prop.
+
+::component-card
+---
+props:
+  label: Button
+---
+::
+
+### Style
+
+Use the `color` and `variant` props to change the visual style of the Button.
+
+::component-card
+---
+props:
+  size: 'default'
+code: WButton
+---
+
+WButton
 ::

@@ -1,10 +1,13 @@
+import { createResolver } from '@nuxt/kit'
+const { resolve } = createResolver(import.meta.url)
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   extends: ['@nuxt/ui-pro'],
   modules: [
     '@nuxt/content',
     '@nuxt/ui',
-    '@nuxt/fonts',
+    'nuxt-component-meta',
     'window-ui-module'
   ],
   hooks: {
@@ -15,9 +18,9 @@ export default defineNuxtConfig({
       globals.forEach((c) => c.global = true)
     }
   },
-  ui: {
-    icons: ['heroicons', 'simple-icons']
-  },
+  // ui: {
+  //   icons: ['heroicons', 'simple-icons']
+  // },
   routeRules: {
     '/api/search.json': { prerender: true },
   },
@@ -26,5 +29,25 @@ export default defineNuxtConfig({
   },
   typescript: {
     strict: false
-  }
+  },
+  componentMeta: {
+    exclude: [
+      '@nuxt/content',
+      '@nuxt/ui-templates',
+      '@nuxtjs/color-mode',
+      '@nuxtjs/mdc',
+      'nuxt/dist',
+      'nuxt-og-image',
+      'nuxt-site-config',
+      resolve('./components'),
+      process.env.NUXT_UI_PRO_PATH ? resolve(process.env.NUXT_UI_PRO_PATH, '.docs', 'components') : '.c12'
+    ],
+    metaFields: {
+      type: false,
+      props: true,
+      slots: true,
+      events: false,
+      exposed: false
+    }
+  },
 })
