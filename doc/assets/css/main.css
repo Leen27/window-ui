@@ -1,0 +1,18 @@
+body {
+  @apply antialiased font-sans text-[#333] bg-background;
+}
+
+main {
+  padding: 20px !important;
+}
+
+h1 {
+  font-weight: 500 !important;
+  font-size: 30px !important;
+  color: rgb(45, 46, 52);
+  margin-bottom: 20px !important;
+}
+
+hr {
+  margin: 10px 0px !important;
+}

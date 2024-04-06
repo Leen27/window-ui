@@ -5,5 +5,15 @@ export default <Partial<Config>>{
   content: [
     './app.vue',
     './pages/**/*.{vue,ts,js,jsx,tsx,md}',
-  ]
+  ],
+  theme: {
+    extend: {
+      colors: {
+        text: {
+          foreground: '#333'
+        },
+        background: '#FFF'
+      }
+    }
+  }
 }
