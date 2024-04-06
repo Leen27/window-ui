@@ -8,16 +8,20 @@ import {
   // addTemplate,
 } from "@nuxt/kit";
 // @ts-ignore
-import { defaultExtractor as createDefaultExtractor } from "tailwindcss/lib/lib/defaultExtractor";
+import { createRequire } from "node:module";
 
-const defaultExtractor = createDefaultExtractor({
-  tailwindConfig: { separator: ":" },
-});
+const _require = createRequire(import.meta.url);
+const defaultColors = _require("tailwindcss/colors.js");
+delete defaultColors.lightBlue;
+delete defaultColors.warmGray;
+delete defaultColors.trueGray;
+delete defaultColors.coolGray;
+delete defaultColors.blueGray;
 
 type UI = {
   primary?: string;
   colors?: string[];
-  strategy?: string
+  strategy?: string;
   [key: string]: any;
 };
 
@@ -40,7 +44,7 @@ export interface ModuleOptions {
    * @default 'w'
    */
   prefix?: string;
-  components: boolean
+  components: boolean;
 }
 
 export default defineNuxtModule<ModuleOptions>({
@@ -50,7 +54,7 @@ export default defineNuxtModule<ModuleOptions>({
   },
   // Default configuration options of the Nuxt module
   defaults: {
-    prefix: '',
+    prefix: "",
     components: true,
   },
   async setup(options, nuxt) {
@@ -67,7 +71,26 @@ export default defineNuxtModule<ModuleOptions>({
     // ui runtime 路径别名
     nuxt.options.alias["#window-ui"] = runtimeDir;
 
-    nuxt.options.css.push(resolve(runtimeDir, 'ui.css'))
+    nuxt.options.css.push(resolve(runtimeDir, "ui.css"));
+
+    // Hooks
+
+    // @nuxtjs/tailwindcss support
+    // @ts-ignore - Module might not exist
+    nuxt.hook("tailwindcss:config", async (tailwindConfig) => {
+      tailwindConfig.theme = tailwindConfig.theme || {};
+      tailwindConfig.theme.extend = tailwindConfig.theme.extend || {};
+      tailwindConfig.theme.extend.colors =
+        tailwindConfig.theme.extend.colors || {};
+      tailwindConfig.theme.extend.colors = {
+        ...tailwindConfig.theme.extend.colors,
+        primary: "rgb(var(--color-primary) / <alpha-value>)",
+        resizer: {
+          "shadow-border":
+            "rgb(var(--window-ui-resizer-border) / <alpha-value>)",
+        },
+      };
+    });
 
     // Modules
 
@@ -86,26 +109,7 @@ export default defineNuxtModule<ModuleOptions>({
             resolve(runtimeDir, "components/**/*.{vue,mjs,ts}"),
             resolve(runtimeDir, "ui.config/**/*.{vue,mjs,ts}"),
           ],
-          transform: {
-            vue: (content: string) => {
-              return content.replaceAll(/(?:\r\n|\r|\n)/g, " ");
-            },
-          },
-          extract: {
-            vue: (content: string) => {
-              return [
-                ...defaultExtractor(content),
-              ];
-            },
-          },
         },
-        theme: {
-          extend: {
-            colors: {
-              primary: 'rgb(var(--color-primary) / <alpha-value>)',
-            }
-          }
-        }
       },
     });
 
@@ -119,7 +123,7 @@ export default defineNuxtModule<ModuleOptions>({
 
     addComponentsDir({
       path: resolve(runtimeDir, "components"),
-      prefix: options.prefix || 'W',
+      prefix: options.prefix || "W",
       global: true,
       watch: false,
     });
@@ -129,7 +133,7 @@ export default defineNuxtModule<ModuleOptions>({
     addImportsDir(resolve(runtimeDir, "composables"));
 
     // Template
-    
+
     // const typetemplate = addTemplate({
     //   filename: 'window-ui.d.ts',
     //   getContents: () => `declare module '#window-ui' {  const cn: typeof import('${resolve('./runtime/utils/cn')}').cn; }`,

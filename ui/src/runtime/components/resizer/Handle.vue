@@ -106,7 +106,7 @@ const onTouchStart = (e: TouchEvent) => {
 <template>
   <div
     ref="handleRef"
-    class="bg-green-50 select-none absolute"
+    class="bg-gray-500 select-none absolute"
     :style="handleStyles"
     @mousedown="onMouseDown"
     @touchstart="onTouchStart"

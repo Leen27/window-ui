@@ -9,10 +9,10 @@ export default defineBuildConfig({
   failOnWarn: false,
   declaration: true,
   clean: true,
-  externals: [
-    '@nuxt/schema',
-  ],
-  rollup: {
-    emitCJS: true,
-  },
+  // externals: [
+  //   '@nuxt/schema',
+  // ],
+  // rollup: {
+  //   emitCJS: true,
+  // },
 });

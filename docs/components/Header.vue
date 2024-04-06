@@ -12,6 +12,9 @@ const { header } = useAppConfig()
         <UColorModeImage v-bind="{ class: 'h-6 w-auto', ...header?.logo }" />
       </template>
       <template v-else>
+        <div class="bg-white text-black border-resizer-shadow-border">
+          132
+        </div>
         WIndow UI<UBadge label="Docs" variant="subtle" class="mb-0.5" />
       </template>
     </template>

@@ -5,15 +5,8 @@ const navigation = inject<Ref<NavItem[]>>('navigation')
 </script>
 
 <template>
-  <UContainer>
-    <UPage>
-      <template #left>
-        <UAside>
-          <UNavigationTree :links="mapContentNavigation(navigation)" />
-        </UAside>
-      </template>
-
-      <slot />
-    </UPage>
-  </UContainer>
+  <div>
+    44444
+    <slot />
+  </div>
 </template>

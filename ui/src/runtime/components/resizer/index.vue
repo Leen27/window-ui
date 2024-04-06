@@ -222,7 +222,7 @@ provideResizerContext({
       v-if="!!forwardRef"
       v-show="shadowVisable"
       ref="shadowRef"
-      class="absolute left-0 top-0 w-full h-full border-[2px] border-black"
+      class="absolute left-0 top-0 w-full h-full border-[2px] border-resizer-shadow-border/50"
       :data-resize-pointerdown="state.isPointerDown"
       :style="{
         width: state.width + 'px',

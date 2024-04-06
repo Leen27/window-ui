@@ -5,10 +5,10 @@ const { resolve } = createResolver(import.meta.url)
 export default defineNuxtConfig({
   extends: ['@nuxt/ui-pro'],
   modules: [
+    'window-ui-module',
     '@nuxt/content',
     '@nuxt/ui',
     'nuxt-component-meta',
-    'window-ui-module'
   ],
   hooks: {
     // Define `@nuxt/ui` components as global to use them in `.md` (feel free to add those you need)
@@ -18,9 +18,6 @@ export default defineNuxtConfig({
       globals.forEach((c) => c.global = true)
     }
   },
-  // ui: {
-  //   icons: ['heroicons', 'simple-icons']
-  // },
   routeRules: {
     '/api/search.json': { prerender: true },
   },
