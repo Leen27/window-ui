@@ -8,7 +8,7 @@ import {
   // addTemplate,
 } from "@nuxt/kit";
 // @ts-ignore
-import { defaultExtractor as createDefaultExtractor } from "tailwindcss/lib/lib/defaultExtractor.js";
+import { defaultExtractor as createDefaultExtractor } from "tailwindcss/lib/lib/defaultExtractor";
 
 const defaultExtractor = createDefaultExtractor({
   tailwindConfig: { separator: ":" },
@@ -40,6 +40,7 @@ export interface ModuleOptions {
    * @default 'w'
    */
   prefix?: string;
+  components: boolean
 }
 
 export default defineNuxtModule<ModuleOptions>({
@@ -48,7 +49,10 @@ export default defineNuxtModule<ModuleOptions>({
     configKey: "windowUi",
   },
   // Default configuration options of the Nuxt module
-  defaults: {},
+  defaults: {
+    prefix: '',
+    components: true,
+  },
   async setup(options, nuxt) {
     const { resolve } = createResolver(import.meta.url);
 

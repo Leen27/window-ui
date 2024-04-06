@@ -1,16 +1,14 @@
-<script lang="ts">
-import type { CSSProperties } from "vue";
-import { computed, ref } from "vue";
-import { injectResizerContext } from "./index.vue";
-import type { Direction } from "../../types/resizer";
-
+<script setup lang="ts">
 export interface ResizerHadleProps {
   direction: Direction;
   className?: string;
   replaceStyles?: CSSProperties;
 }
-</script>
-<script setup lang="ts">
+import type { CSSProperties } from "vue";
+import { computed, ref } from "vue";
+import type { Direction } from "../../types/resizer";
+import { injectResizerContext } from '#window-ui/ui.config'
+
 // Props
 const props = defineProps<ResizerHadleProps>();
 

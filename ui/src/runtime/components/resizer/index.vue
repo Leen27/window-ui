@@ -1,4 +1,4 @@
-<script lang="ts">
+<script setup lang="ts">
 /**
  * https://github.com/bokuweb/re-resizable/blob/master/src/index.tsx
  */
@@ -7,13 +7,13 @@ import {
   Primitive,
   type PrimitiveProps,
   useForwardExpose,
-  createContext,
 } from "radix-vue";
 import { cn, getResizeEventCoordinates, isTouchEvent } from "#window-ui/utils";
-import type { Direction, ResizeEvent } from "#window-ui/types/resizer";
+import type { Direction, ResizeEvent, ResizerState } from "#window-ui/types/resizer";
 import type { HTMLAttributes } from "vue";
 import { toReactive, useElementBounding } from "@vueuse/core";
 import Handle from "./Handle.vue";
+import { provideResizerContext } from "../../ui.config/resizer";
 
 interface NewSize {
   newHeight: number | string;
@@ -29,36 +29,6 @@ export interface ResizerProps extends PrimitiveProps {
   minHeight?: number;
 }
 
-type ResizerState = {
-  isPointerDown: boolean;
-  direction?: Direction;
-  width: number
-  height: number
-  x: number
-  y: number
-};
-
-export type ResizerContext = {
-  resizerElementRef: Ref<HTMLElement>;
-  shadowRef: Ref<HTMLElement>;
-  handleRef?: Ref<HTMLElement>;
-  elementBounding: ReturnType<typeof useElementBounding>;
-  state: ResizerState;
-  readonly readmaxWidth?: number;
-  readonly maxHeight?: number;
-  readonly minWidth?: number;
-  readonly minHeight?: number;
-  onResizeStart: (
-    e: MouseEvent | TouchEvent,
-    direction: Direction,
-    handleEl: HTMLElement
-  ) => void;
-};
-
-export const [injectResizerContext, provideResizerContext] =
-  createContext<ResizerContext>("Resizer");
-</script>
-<script setup lang="ts">
 const props = defineProps<ResizerProps>();
 
 // Refs
