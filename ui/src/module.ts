@@ -5,17 +5,14 @@ import {
   installModule,
   addComponentsDir,
   addImportsDir,
+  // addTemplate,
 } from "@nuxt/kit";
-import { createRequire } from "node:module";
 // @ts-ignore
 import { defaultExtractor as createDefaultExtractor } from "tailwindcss/lib/lib/defaultExtractor.js";
-// import type { DeepPartial, Strategy } from "./runtime/types/utils";
 
 const defaultExtractor = createDefaultExtractor({
   tailwindConfig: { separator: ":" },
 });
-const _require = createRequire(import.meta.url);
-const defaultColors = _require("tailwindcss/colors.js");
 
 type UI = {
   primary?: string;
@@ -126,5 +123,16 @@ export default defineNuxtModule<ModuleOptions>({
     // Composables
 
     addImportsDir(resolve(runtimeDir, "composables"));
+
+    // Template
+    
+    // const typetemplate = addTemplate({
+    //   filename: 'window-ui.d.ts',
+    //   getContents: () => `declare module '#window-ui' {  const cn: typeof import('${resolve('./runtime/utils/cn')}').cn; }`,
+    // }).dst
+
+    // nuxt.hook('prepare:types', (options) => {
+    //   options.references.push({ path: typetemplate })
+    // })
   },
 });
