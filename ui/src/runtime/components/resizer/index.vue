@@ -7,11 +7,12 @@ import {
   Primitive,
   type PrimitiveProps,
   useForwardExpose,
+  Slot
 } from "radix-vue";
 import { cn, getResizeEventCoordinates, isTouchEvent } from "#window-ui/utils";
 import type { Direction, ResizeEvent, ResizerState } from "#window-ui/types/resizer";
 import type { HTMLAttributes } from "vue";
-import { toReactive, useElementBounding } from "@vueuse/core";
+import { toReactive, useDraggable, useElementBounding } from "@vueuse/core";
 import Handle from "./Handle.vue";
 import { provideResizerContext } from "../../ui.config/resizer";
 
@@ -205,6 +206,9 @@ const unbindEvents = () => {
   ownerDocument.removeEventListener("touchend", onMouseUp);
 };
 
+const triggerRef = ref()
+const { x, y } = useDraggable(triggerRef);
+
 provideResizerContext({
   resizerElementRef,
   shadowRef,
@@ -216,8 +220,21 @@ provideResizerContext({
 <template>
   <Primitive
     :ref="forwardRef"
-    :class="cn('relative', props.class)"
+    :class="cn('absolute', props.class)"
+    :style="{
+      left: x + 'px',
+      top: y + 'px'
+    }"
   >
+    <div
+      ref="triggerRef"
+      class="select-none"
+    >
+      <slot 
+        name="drag-trigger"
+      />
+    </div>
+
     <div
       v-if="!!forwardRef"
       v-show="shadowVisable"
