@@ -1,28 +1,28 @@
 # Resizer
 
 ```vue
-<template>
-<div>
-    <w-resizer class="bg-primary w-[100px] h-[100px] absolute left-[30%] top-50">
-        <div class="w-[100px] h-[100px]">
+      <w-resizer
+        class="bg-primary w-[300px] h-[300px]"
+        pos="center"
+      >
+        <template #drag-trigger>
+          <div class="w-full h-[30px] bg-green-400">Header</div>
+        </template>
+        <div class="w-[100px] h-[100px] bg-blue-300 text-white absolute left-[50%] translate-x-[-50%]">
           resize me
         </div>
       </w-resizer>
-</div>
-</template>
 ```
+
 <template>
-    <w-resizer class="bg-primary w-[100px] h-[100px] absolute"
-    :initX="500"
-    :initY="500"
-    :max-width="200"
-    :min-width="100"
-    :max-height="200"
-    >
-      <template #drag-trigger>
-        <div class="w-full h-[30px] bg-green-400"></div>
-      </template>
-        <div class="w-[100px] h-[100px]">
+      <w-resizer
+        class="bg-primary w-[300px] h-[300px]"
+        pos="center"
+      >
+        <template #drag-trigger>
+          <div class="w-full h-[30px] bg-green-400">Header</div>
+        </template>
+        <div class="w-[100px] h-[100px] bg-blue-300 text-white absolute left-[50%] translate-x-[-50%]">
           resize me
         </div>
       </w-resizer>
