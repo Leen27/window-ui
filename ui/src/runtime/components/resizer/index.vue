@@ -31,10 +31,13 @@ export interface ResizerProps extends PrimitiveProps {
   initY?: number
   pos?: 'center'
   container?: HTMLElement
+  draggble?: boolean
+  enable?: Direction[]
 }
 
 const props = defineProps<ResizerProps>();
-
+const allDirection = ["top", "right", "bottom", "left", "topRight", "bottomRight" , "bottomLeft" , "topLeft"]
+const enableDirection = computed(() => props.enable ? props.enable : allDirection)
 // Refs
 const { forwardRef, currentElement: resizerElementRef } = useForwardExpose();
 const shadowRef = ref();
@@ -207,14 +210,14 @@ const unbindEvents = () => {
   ownerDocument.removeEventListener("touchend", onMouseUp);
 };
 
-const triggerRef = ref()
-console.log(props.container)
-const { x, y } = useDraggable(triggerRef, {
+const dragRef = ref()
+const { x, y } = useDraggable(dragRef, {
   initialValue: {
     x: (props.initX || 0),
     y: (props.initY || 0)
   },
-  containerElement: props.container
+  containerElement: props.container,
+  disabled: !props.draggble
 });
 
 onMounted(() => {
@@ -244,8 +247,8 @@ provideResizerContext({
       }"
     >
       <div
-        ref="triggerRef"
-        class="select-none"
+        ref="dragRef"
+        class="select-none cursor-move"
       >
         <slot 
           name="drag-trigger"
@@ -265,14 +268,11 @@ provideResizerContext({
         }"
       />
 
-      <Handle direction="right" />
-      <Handle direction="left" />
-      <Handle direction="bottom" />
-      <Handle direction="top" />
-      <Handle direction="topRight" />
-      <Handle direction="bottomRight" />
-      <Handle direction="bottomLeft" />
-      <Handle direction="topLeft" />
+      <Handle
+        v-for="d in enableDirection"
+        :key="d"
+        :direction="d as Direction"
+      />
       <slot />
     </Primitive>
   </Teleport>
