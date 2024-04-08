@@ -241,7 +241,7 @@ provideResizerContext({
     <Primitive
       :ref="forwardRef"
       :class="cn('fixed', props.class)"
-      :style="{
+      :style="!draggble ? {} : {
         left: x + 'px',
         top: y + 'px'
       }"
