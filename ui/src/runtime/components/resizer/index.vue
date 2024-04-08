@@ -2,19 +2,18 @@
 /**
  * https://github.com/bokuweb/re-resizable/blob/master/src/index.tsx
  */
-import { ref, reactive, type Ref, computed } from "vue";
+import { ref, reactive, computed } from "vue";
 import {
   Primitive,
   type PrimitiveProps,
-  useForwardExpose,
-  Slot
-} from "radix-vue";
-import { cn, getResizeEventCoordinates, isTouchEvent } from "#window-ui/utils";
+  useForwardExpose} from "radix-vue";
+import { cn, isTouchEvent } from "#window-ui/utils";
 import type { Direction, ResizeEvent, ResizerState } from "#window-ui/types/resizer";
 import type { HTMLAttributes } from "vue";
 import { toReactive, useDraggable, useElementBounding } from "@vueuse/core";
 import Handle from "./Handle.vue";
 import { provideResizerContext } from "../../ui.config/resizer";
+import { onMounted } from "vue";
 
 interface NewSize {
   newHeight: number | string;
@@ -28,6 +27,10 @@ export interface ResizerProps extends PrimitiveProps {
   maxWidth?: number;
   minWidth?: number;
   minHeight?: number;
+  initX?: number
+  initY?: number
+  pos?: 'center'
+  container?: HTMLElement
 }
 
 const props = defineProps<ResizerProps>();
@@ -61,8 +64,6 @@ const onResizeStart = (
   if (!handleEl) return;
 
   handleRef.value = handleEl;
-  const { x, y } = getResizeEventCoordinates(e);
-
   state.isPointerDown = true;
   state.direction = direction;
 
@@ -77,7 +78,7 @@ const onResizeStart = (
   return;
 };
 
-const onMouseUp = (e: ResizeEvent) => {
+const onMouseUp = () => {
   if (!state.isPointerDown) return;
   unbindEvents();
   state.isPointerDown = false;
@@ -207,7 +208,21 @@ const unbindEvents = () => {
 };
 
 const triggerRef = ref()
-const { x, y } = useDraggable(triggerRef);
+console.log(props.container)
+const { x, y } = useDraggable(triggerRef, {
+  initialValue: {
+    x: (props.initX || 0),
+    y: (props.initY || 0)
+  },
+  containerElement: props.container
+});
+
+onMounted(() => {
+  if (props.pos === 'center') {
+    resizerElementRef.value.style.left = window.innerWidth / 2 + 'px'
+    resizerElementRef.value.style.top = window.innerHeight / 2 + 'px'
+  }
+})
 
 provideResizerContext({
   resizerElementRef,
@@ -216,47 +231,49 @@ provideResizerContext({
   state,
   onResizeStart,
 });
+
 </script>
 <template>
-  <Primitive
-    :ref="forwardRef"
-    :class="cn('absolute', props.class)"
-    :style="{
-      left: x + 'px',
-      top: y + 'px'
-    }"
-  >
-    <div
-      ref="triggerRef"
-      class="select-none"
-    >
-      <slot 
-        name="drag-trigger"
-      />
-    </div>
-
-    <div
-      v-if="!!forwardRef"
-      v-show="shadowVisable"
-      ref="shadowRef"
-      class="absolute left-0 top-0 w-full h-full border-[2px] border-resizer-shadow-border/50"
-      :data-resize-pointerdown="state.isPointerDown"
+  <Teleport to="body">
+    <Primitive
+      :ref="forwardRef"
+      :class="cn('fixed', props.class)"
       :style="{
-        width: state.width + 'px',
-        height: state.height + 'px',
-        left: state.x + 'px',
-        top: state.y + 'px'
+        left: x + 'px',
+        top: y + 'px'
       }"
-    />
+    >
+      <div
+        ref="triggerRef"
+        class="select-none"
+      >
+        <slot 
+          name="drag-trigger"
+        />
+      </div>
+      <div
+        v-if="!!forwardRef"
+        v-show="shadowVisable"
+        ref="shadowRef"
+        class="absolute left-0 top-0 w-full h-full border-[2px] border-resizer-shadow-border/50"
+        :data-resize-pointerdown="state.isPointerDown"
+        :style="{
+          width: state.width + 'px',
+          height: state.height + 'px',
+          left: state.x + 'px',
+          top: state.y + 'px'
+        }"
+      />
 
-    <Handle direction="right" />
-    <Handle direction="left" />
-    <Handle direction="bottom" />
-    <Handle direction="top" />
-    <Handle direction="topRight" />
-    <Handle direction="bottomRight" />
-    <Handle direction="bottomLeft" />
-    <Handle direction="topLeft" />
-    <slot />
-  </Primitive>
+      <Handle direction="right" />
+      <Handle direction="left" />
+      <Handle direction="bottom" />
+      <Handle direction="top" />
+      <Handle direction="topRight" />
+      <Handle direction="bottomRight" />
+      <Handle direction="bottomLeft" />
+      <Handle direction="topLeft" />
+      <slot />
+    </Primitive>
+  </Teleport>
 </template>
