@@ -6,7 +6,13 @@ const handleAddPanel = (direction: 'left' | 'top' | 'right' | 'bottom') => {
   panelQueue.push({
     title: `${direction}-test-${count.value++}`,
     pos: direction,
-    render: () => h('div', 'text')
+    render: () => h('div', {
+      style: {
+        width: '400px',
+        height: '400px',
+        backgroundColor: '#333'
+      }
+    },'text')
   })
 }
 </script>

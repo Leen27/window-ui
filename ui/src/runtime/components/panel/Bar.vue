@@ -3,7 +3,6 @@ import { computed } from 'vue';
 import {useMainPanel} from '../../hooks/useMainPanel'
 import {cva} from 'class-variance-authority'
 import { injectPanelMain } from '../../ui.config'
-import { inject } from 'vue';
 
 type Props = {
   direction: 'top' | 'left' | 'right' | 'bottom'

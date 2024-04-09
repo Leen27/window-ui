@@ -6,7 +6,7 @@ type Props = {
 }
 
 const props = defineProps<Props>()
-const { pinPanel, unPin, closePanel } = useMainPanel()
+const { pinPanel, unPin, removePanel } = useMainPanel()
 const ifPined = computed(() => props.panel.pined)
 </script>
 <template>
@@ -17,7 +17,7 @@ const ifPined = computed(() => props.panel.pined)
         <span v-if="ifPined">unpin</span>
         <span v-else>pin</span>
       </div>
-      <div @click="closePanel(panel)">
+      <div @click="removePanel(panel)">
         close
       </div>
     </div>

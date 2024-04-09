@@ -33,10 +33,18 @@ const openPanel = (panel: Panel) => {
 const closePanel = (panel: Panel) => {
   panel.open = false
   panel.pined = false
+  
+}
+
+const removePanel = (panel: Panel) => {
+const index = panelQueue.findIndex(p => p.title === panel.title)
+  if (index > -1) {
+    panelQueue.splice(index, 1)
+  }
 }
 
 const pinPanel = (panel: Panel) => {
-  console.log(panel, '1')
+  panelQueue.filter(p => p.pined && p.pos === panel.pos).forEach(p => p.pined = false)
   panel.pined = true
 }
 
@@ -49,6 +57,7 @@ export const useMainPanel = () => {
     panelQueue,
     openPanel,
     closePanel,
+    removePanel,
     pinPanel,
     unPin
   };
