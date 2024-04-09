@@ -27,13 +27,16 @@ watch(() => pined.value, () => {
     :id="`splitter-group-main-panel-${direction}`"
     ref="panelRef"
     :default-size="0"
-    class="w-full h-full bg-white flex items-center justify-center"
+    class="w-full h-full bg-white flex flex-col items-center justify-center"
   >
+    <panel-header
+      v-if="pined"
+      :panel="pined"
+    />
     <div
       v-if="pined"
-      class="w-full h-full"
+      class="w-full h-full overflow-auto"
     >
-      <panel-header :panel="pined" />
       <component
         :is="pined.render"
         v-if="pined?.render"

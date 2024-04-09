@@ -4,8 +4,11 @@
 
 @layer base {
   :root {
+    /* base */
     --color-primary: 255 115 179;
     --color-secondary: 111 114 185;
+
+    --color-background: 227 227 227;
 
     /* resizer */
     --window-ui-resizer-border: 150 150 150;    

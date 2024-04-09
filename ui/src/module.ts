@@ -85,6 +85,7 @@ export default defineNuxtModule<ModuleOptions>({
       tailwindConfig.theme.extend.colors = {
         ...tailwindConfig.theme.extend.colors,
         primary: "rgb(var(--color-primary) / <alpha-value>)",
+        background: "rgb(var(--color-background) / <alpha-value>)",
         resizer: {
           "shadow-border":
             "rgb(var(--window-ui-resizer-border) / <alpha-value>)",
