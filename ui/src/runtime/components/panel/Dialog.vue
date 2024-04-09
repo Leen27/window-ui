@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Panel } from '../../hooks/useMainPanel';
+import type { Panel } from '../../composables/useMainPanel';
 import { cva } from 'class-variance-authority';
 import {cn} from '../../utils'
 import { computed } from 'vue';

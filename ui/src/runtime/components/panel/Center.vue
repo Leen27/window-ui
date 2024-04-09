@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { SplitterPanel, SplitterGroup } from 'radix-vue'
 import PanelSplitter from './Splitter.vue'
-import { useMainPanel } from '../../hooks/useMainPanel'
+import { useMainPanel } from '../../composables/useMainPanel'
+import PanelSplitterHandle from './SplitterHandle.vue'
 
 useMainPanel()
 
@@ -16,6 +17,8 @@ useMainPanel()
       direction="vertical"
     >
       <panel-splitter direction="top" />
+
+      <panel-splitter-handle direction="top" />
       <SplitterPanel
         id="splitter-group-center-panel-viwer"
         :min-size="20"
@@ -23,6 +26,7 @@ useMainPanel()
       >
         editor
       </SplitterPanel>
+      <panel-splitter-handle direction="bottom" />
       <panel-splitter direction="bottom" />
     </SplitterGroup>
   </SplitterPanel>

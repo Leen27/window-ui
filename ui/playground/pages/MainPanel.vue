@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {useMainPanel} from '#window-ui/hooks/useMainPanel'
+import {useMainPanel} from '#window-ui/composables/useMainPanel'
 const { panelQueue } = useMainPanel()
 const count = ref(0)
 const handleAddPanel = (direction: 'left' | 'top' | 'right' | 'bottom') => {

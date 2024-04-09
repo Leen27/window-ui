@@ -2,7 +2,7 @@
 import { SplitterResizeHandle } from 'radix-vue'
 import {cva} from 'class-variance-authority'
 import { computed } from 'vue';
-import { useMainPanel } from '../../hooks/useMainPanel';
+import { useMainPanel } from '../../composables/useMainPanel';
 
 type Props = {
   direction: 'top' | 'left' | 'right' | 'bottom'

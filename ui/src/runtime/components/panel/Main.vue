@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { SplitterGroup } from 'radix-vue'
-import {useMainPanel} from '../../hooks/useMainPanel'
+import {useMainPanel} from '../../composables/useMainPanel'
 import CenterPanel from './Center.vue'
 import PanelSplitter from './Splitter.vue'
 import PanelBar from './Bar.vue'

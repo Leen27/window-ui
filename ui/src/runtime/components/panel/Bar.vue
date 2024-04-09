@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import {useMainPanel} from '../../hooks/useMainPanel'
+import {useMainPanel} from '../../composables/useMainPanel'
 import {cva} from 'class-variance-authority'
 import { injectPanelMain } from '../../ui.config'
 

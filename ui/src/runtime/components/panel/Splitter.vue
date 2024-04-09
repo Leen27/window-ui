@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { SplitterPanel } from 'radix-vue'
-import {useMainPanel } from '../../hooks/useMainPanel'
+import {useMainPanel } from '../../composables/useMainPanel'
 import { computed, ref, watch } from 'vue';
 import PanelHeader from './Header.vue'
 type Props = {

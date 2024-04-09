@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import {type Panel, useMainPanel } from '../../hooks/useMainPanel'
+import {type Panel, useMainPanel } from '../../composables/useMainPanel'
 type Props = {
   panel: Panel
 }

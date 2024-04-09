@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { useMainPanel, type Panel } from '../../hooks/useMainPanel';
+import { useMainPanel, type Panel } from '../../composables/useMainPanel';
 import PanelHeader from './Header.vue'
 import { SplitterPanel, SplitterGroup, SplitterResizeHandle } from 'radix-vue'
 import { cva } from 'class-variance-authority';
