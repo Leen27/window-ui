@@ -1,5 +1,6 @@
 <script setup lang="ts"></script>
 <template>
+  <ClientOnly>
  <content-navigation v-slot="{ navigation }">
       <ul class="bg-primary/80 w-[300px] h-screen text-white pl-2">
         <li v-for="link of navigation" :key="link._path">
@@ -16,4 +17,6 @@
         </li>
       </ul>
     </content-navigation>
+  </ClientOnly>
+
 </template>

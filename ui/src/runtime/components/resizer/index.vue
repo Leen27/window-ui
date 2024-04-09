@@ -27,10 +27,22 @@ export interface ResizerProps extends PrimitiveProps {
   maxWidth?: number;
   minWidth?: number;
   minHeight?: number;
+  /**
+   * @description 初始化left 位置, 只有 draggble 为 true 的时候启用
+   */
   initX?: number
+  /**
+   * @description 初始化 top 位置, 只有 draggble 为 true 的时候启用
+   */
   initY?: number
+  /**
+   * @description 初始化位置为居中, 只有 draggble 为 true 的时候启用
+   */
   pos?: 'center'
   container?: HTMLElement
+  /**
+   * @description 是否可以拖拽
+   */
   draggble?: boolean
   enable?: Direction[]
 }
@@ -221,7 +233,7 @@ const { x, y } = useDraggable(dragRef, {
 });
 
 onMounted(() => {
-  if (props.pos === 'center') {
+  if (props.draggble && props.pos === 'center') {
     resizerElementRef.value.style.left = window.innerWidth / 2 + 'px'
     resizerElementRef.value.style.top = window.innerHeight / 2 + 'px'
   }
