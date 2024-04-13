@@ -1,5 +1,5 @@
 export default defineNuxtConfig({
-  modules: ['../src/module'],
+  modules: ['@nuxt/test-utils/module', '../src/module'],
   windowUi: {},
   devtools: { enabled: true }
 })

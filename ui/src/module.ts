@@ -72,7 +72,8 @@ export default defineNuxtModule<ModuleOptions>({
     nuxt.options.alias["#window-ui"] = runtimeDir;
 
     nuxt.options.css.push(resolve(runtimeDir, "ui.css"));
-
+    nuxt.options.css.push('splitpanes/dist/splitpanes.css');
+    
     // Hooks
 
     // @nuxtjs/tailwindcss support
@@ -134,7 +135,6 @@ export default defineNuxtModule<ModuleOptions>({
     addImportsDir(resolve(runtimeDir, "composables"));
 
     // Template
-
     // const typetemplate = addTemplate({
     //   filename: 'window-ui.d.ts',
     //   getContents: () => `declare module '#window-ui' {  const cn: typeof import('${resolve('./runtime/utils/cn')}').cn; }`,

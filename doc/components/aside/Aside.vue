@@ -2,7 +2,7 @@
 <template>
   <ClientOnly>
  <content-navigation v-slot="{ navigation }">
-      <ul class="bg-primary/80 w-[300px] h-screen text-white pl-2">
+      <ul class="bg-primary/80 w-[200px] h-screen text-white pl-2">
         <li v-for="link of navigation" :key="link._path">
           <nuxt-link :to="link._path">
             {{ link.title }}

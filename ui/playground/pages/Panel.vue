@@ -1,0 +1,3 @@
+<template>
+  <w-panel />
+</template>
