@@ -55,14 +55,14 @@ export class Panel {
     return parent?.add(pos, this);
   }
 
-  async moveTo(toPanel: Panel, pos: Pos) {
+  moveTo(toPanel: Panel, pos: Pos) {
     const parent = this.getParent() as Group
-    await parent?.move(this, toPanel, pos);
+    parent?.move(this, toPanel, pos);
   }
 
-  async remove() {
+  remove() {
     const parent = this.getParent()
-    await parent?.remove(this);
+    parent?.remove(this);
   }
 }
 
@@ -144,7 +144,7 @@ export class Group {
     return this.insert(insertTo, undefined, addPanel)
   }
 
-  async remove(panel: Panel | Group, clearCache?: boolean) {
+  remove(panel: Panel | Group, clearCache?: boolean) {
     // 跟容器无法删除
     if ((panel as Group).isRoot) return
 
@@ -165,12 +165,14 @@ export class Group {
     }
   }
 
-  async move(fromPanel: Panel, toPanel: Panel, pos: Pos) {    
-      await fromPanel.remove()
-      await nextTick(() => {
+  move(fromPanel: Panel, toPanel: Panel, pos: Pos) {    
+      fromPanel.remove()
         const toGroup = toPanel.getParent() as Group
         toGroup.add(pos, toPanel, fromPanel)
-      })
+      //  nextTick(() => {
+      //   const toGroup = toPanel.getParent() as Group
+      //   toGroup.add(pos, toPanel, fromPanel)
+      // })
     // setTimeout(() => {
     //   const toGroup = toPanel.getParent() as Group
     //   console.log(pos, toPanel.id, fromPanel.id)
