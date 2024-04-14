@@ -1,5 +1,5 @@
 import { createContext } from "radix-vue";
-import { type Ref, reactive, markRaw, ref, shallowReactive, type ShallowRef, nextTick } from "vue";
+import { type Ref, markRaw, ref, type ShallowRef } from "vue";
 
 export type Pos = "left" | "top" | "right" | "bottom";
 
@@ -169,19 +169,6 @@ export class Group {
       fromPanel.remove()
         const toGroup = toPanel.getParent() as Group
         toGroup.add(pos, toPanel, fromPanel)
-      //  nextTick(() => {
-      //   const toGroup = toPanel.getParent() as Group
-      //   toGroup.add(pos, toPanel, fromPanel)
-      // })
-    // setTimeout(() => {
-    //   const toGroup = toPanel.getParent() as Group
-    //   console.log(pos, toPanel.id, fromPanel.id)
-    //   toGroup.add(pos, toPanel, fromPanel)
-
-    //   setTimeout(() => {
-    //     this.remove(fromPanel, false)
-    //   }, 10)
-    // }, 10)
   }
 
   panelToGroup(direction: PanelDirection, insertTo: InsertPos, panel: Panel, addPanel?: Panel) {
