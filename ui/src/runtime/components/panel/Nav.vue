@@ -50,6 +50,7 @@ watchEffect(() => {
     />
     <BookmarkIcon
       class="w-4 h-4"
+      @mouseup="dragPanel?.moveTo(hoverPanel!, 'tags')"
     />
     <ArrowRightFromLineIcon
     

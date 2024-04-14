@@ -1,7 +1,8 @@
 import { createContext } from "radix-vue";
+import { Pane } from "splitpanes";
 import { type Ref, markRaw, ref, type ShallowRef } from "vue";
 
-export type Pos = "left" | "top" | "right" | "bottom";
+export type Pos = "left" | "top" | "right" | "bottom" | "tags";
 
 export type PanelDirection = "horizontal" | "vertical";
 
@@ -9,7 +10,7 @@ export type InsertPos = "before" | "after";
 
 let count = 0;
 
-const panelMap = new Map<string, Group | Panel>();
+const panelMap = new Map<string, Group | Panel | TagsGroup>();
 
 export const posToDirection = (pos: Pos): PanelDirection => {
   return {
@@ -17,6 +18,7 @@ export const posToDirection = (pos: Pos): PanelDirection => {
     bottom: "horizontal",
     right: "vertical",
     left: "vertical",
+    tags: "tags"
   }[pos] as PanelDirection;
 };
 
@@ -26,6 +28,7 @@ export const insertPos = (pos: Pos): InsertPos => {
     left: "before",
     bottom: "after",
     right: "after",
+    tags: "after"
   }[pos] as InsertPos;
 };
 
@@ -66,9 +69,50 @@ export class Panel {
   }
 }
 
+export class TagsGroup {
+  id: Ref<string> = ref("window-ui-panel-tags-group-" + count++);
+  panels: Ref<Array<Panel>> = ref([]);
+  parentId: Ref<string | undefined> = ref()
+  __isTagsGroup = true;
+
+  constructor({ parent }: { parent?: string } = {}) {
+    panelMap.set(this.id.value, this);
+    this.panels.value = [] as Panel[];
+    this.parentId.value = parent
+  }
+ 
+  get isTagsGroup() {
+    return true
+  }
+
+  getParent() {
+    if (!this.parentId.value) return
+    return panelMap.get(this.parentId.value) as Group
+  }
+
+  add(panel: Panel) {
+    this.panels.value.push(panel)
+  }
+  
+  remove(panel: Panel) {
+    const index = this.panels.value.findIndex(p => p.id.value === panel.id.value)
+    if(index > -1) {
+      this.panels.value.splice(index, 1)
+
+      if (this.panels.value.length === 0) {
+        const parent = this.getParent()
+        if (!parent?.isGroup) {
+          return
+        }
+        parent.remove(this)
+      }
+    }
+  }
+}
+
 export class Group {
   id: Ref<string> = ref("window-ui-panel-group-" + count++);
-  panels: Ref<Array<Panel | Group>> = ref([]);
+  panels: Ref<Array<Panel | Group | TagsGroup>> = ref([]);
   direction: Ref<PanelDirection>;
   parentId: Ref<string | undefined> = ref()
   __isGroup = true;
@@ -124,27 +168,56 @@ export class Group {
     return added
   }
 
-  add(pos: Pos, toPanel?: Panel, addPanel?: Panel) {
+  toTags(toPanel?: Panel | TagsGroup, addPanel?: Panel) {
+    console.log('tags', toPanel, addPanel)
+
+    const added = addPanel || new Panel({})
+
+    if ((toPanel as TagsGroup)?.isTagsGroup) {
+      const group = toPanel as TagsGroup
+      added.parentId.value = group!.id.value
+      group!.panels.value.push(added)
+      return added
+    }
+
+    const tagsGroup = new TagsGroup({ parent: this.parentId.value })
+    added.parentId.value = tagsGroup.id.value
+    toPanel && this.remove(toPanel)
+    ;(toPanel as Panel)?.isPanel && tagsGroup.panels.value.push((toPanel as Panel))
+    this.panels.value.push(tagsGroup)
+
+    return added
+  }
+
+  add(pos: Pos, toPanel?: Panel | TagsGroup, addPanel?: Panel) {
+    // Tags
+    if(pos === 'tags' || (toPanel as TagsGroup)?.isTagsGroup) {
+      return this.toTags(toPanel, addPanel)
+    }
+
+    const _toPanel = toPanel as Panel
+
+    // Split
     const dir = posToDirection(pos);
     const insertTo = insertPos(pos);
 
     if (dir === this.direction.value) {
-      return this.insert(insertTo, toPanel, addPanel)
+      return this.insert(insertTo, _toPanel, addPanel)
     }
 
     if (this.panels.value.length === 1) {
       this.direction.value = dir
-      return this.insert(insertTo, toPanel, addPanel)
+      return this.insert(insertTo, _toPanel, addPanel)
     }
 
     if (toPanel) {
-      return this.panelToGroup(dir, insertTo, toPanel, addPanel)
+      return this.panelToGroup(dir, insertTo, _toPanel, addPanel)
     }
 
     return this.insert(insertTo, undefined, addPanel)
   }
 
-  remove(panel: Panel | Group, clearCache?: boolean) {
+  remove(panel: Panel | Group | TagsGroup, clearCache?: boolean) {
     // 跟容器无法删除
     if ((panel as Group).isRoot) return
 

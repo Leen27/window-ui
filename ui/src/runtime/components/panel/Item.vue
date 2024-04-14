@@ -1,16 +1,18 @@
 <script setup lang="ts">
 import { Splitpanes, Pane } from 'splitpanes'
-import { Panel, type Group, injectPanelContext} from '../../composables/use-panel'
+import { Panel, type Group, injectPanelContext, TagsGroup} from '../../composables/use-panel'
 import { computed } from 'vue';
-import PanelHader from './Header.vue'
+import PanelTags from './Tags.vue'
+import PanelContent from './Content.vue'
+
 type Props = {
   group: Group
 }
 
 const props = defineProps<Props>()
 const horizontal = computed(() => props.group.direction.value === 'horizontal')
-const panels = computed(() => props.group.panels.value.filter(p => (p as Panel).isPanel || ((p as Group).panels.value.length > 0)))
-const { onHover } =injectPanelContext()
+const panels = computed(() => props.group.panels.value.filter(p => (p as Panel).isPanel || ((p as Group).panels.value?.length > 0) || (p as TagsGroup).isTagsGroup))
+
 </script>
 <template>
   <splitpanes
@@ -26,31 +28,17 @@ const { onHover } =injectPanelContext()
     >
       {{ panel.id }} #
       <Item
-        v-if="(panel as Group).isGroup && ((panel as Group).panels.value.length > 0)"
+        v-if="(panel as Group).isGroup && ((panel as Group).panels.value?.length > 0)"
         :group="panel as Group"
       />
-      <div
+      <PanelTags
+        v-else-if="(panel as TagsGroup).isTagsGroup"
+        :group="panel as TagsGroup"
+      />
+      <PanelContent 
         v-else-if="(panel as Panel).isPanel"
-        :id="panel.id.value"
-        class="relative w-full h-full"
-        @mouseenter="onHover(panel as Panel)"
-      >
-        <PanelHader :panel="panel as Panel" />
-        <div class="">
-          <w-button @click="panel.add('left')">
-            left
-          </w-button>
-          <w-button @click="panel.add('top')">
-            top
-          </w-button>
-          <w-button @click="panel.add('right')">
-            right
-          </w-button>
-          <w-button @click="panel.add('bottom')">
-            bottom
-          </w-button>
-        </div>
-      </div>
+        :panel="panel as Panel"
+      />
     </Pane>
   </splitpanes>
 </template>
