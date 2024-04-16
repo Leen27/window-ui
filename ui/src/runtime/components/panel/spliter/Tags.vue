@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { Panel, TagsGroup} from '../../composables/use-panel'
-import { computed } from 'vue';
+import { Panel, TagsGroup} from '../../../composables/use-panel-spliter'
 import PanelContent from './Content.vue'
 
 type Props = {
@@ -16,7 +15,7 @@ const props = defineProps<Props>()
       :key="toValue(p.id)"
     >
       {{ p.id }}
-      <!-- <PanelContent :panel="p as Panel" /> -->
+      <PanelContent :panel="p as Panel" />
     </div>
   </div>
 </template>

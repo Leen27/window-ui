@@ -1,326 +1,133 @@
 import { createContext } from "radix-vue";
-import { Pane } from "splitpanes";
-import { type Ref, markRaw, ref, type ShallowRef } from "vue";
+import { reactive, ref, toRefs, type DefineComponent, type AsyncComponentLoader, h, type VNode } from "vue";
+import Spliter from '../components/panel/spliter/index.vue'
+import { Panel as SpliterPanel } from './use-panel-spliter'
+import { watchOnce } from "@vueuse/core";
 
-export type Pos = "left" | "top" | "right" | "bottom" | "tags";
-
-export type PanelDirection = "horizontal" | "vertical";
-
-export type InsertPos = "before" | "after";
-
-let count = 0;
-
-const panelMap = new Map<string, Group | Panel | TagsGroup>();
-
-export const posToDirection = (pos: Pos): PanelDirection => {
-  return {
-    top: "horizontal",
-    bottom: "horizontal",
-    right: "vertical",
-    left: "vertical",
-    tags: "tags"
-  }[pos] as PanelDirection;
+export type Panel = {
+  id: string
+  title: string;
+  pined?: boolean;
+  open?: boolean;
+  pos: PanelQueuePos
+  render: DefineComponent | (() => VNode)
 };
 
-export const insertPos = (pos: Pos): InsertPos => {
-  return {
-    top: "before",
-    left: "before",
-    bottom: "after",
-    right: "after",
-    tags: "after"
-  }[pos] as InsertPos;
-};
+export type PanelQueuePos = 'left' | 'top' | 'right' | 'bottom'
 
-export class Panel {
-  id: Ref<string> = ref("window-ui-panel-group-panel-" + count++)
-  parentId: Ref<string | undefined> = ref()
-  title: Ref<string> = ref('')
-  __isPanel = true;
+export type PanelQueue = Panel[];
 
-  constructor({ parent, title }: { parent?: string, title?: string }) {
-    panelMap.set(this.id.value, this)
-    this.parentId.value = parent;
-    this.title.value = title || this.id.value
-  }
+const panelQueue = reactive<PanelQueue>([
+    {
+      id: "window-ui-panel-queue-Property",
+      title: "Property",
+      pined: false,
+      open: false,
+      pos: 'right',
+      render: () => h('div', 'p1')
+    },
+    {
+      id: "window-ui-panel-queue-P2",
+      title: "P2",
+      pined: false,
+      open: false,
+      pos: 'right',
+      render: () => h('div', 'p2')
+    },
+    {
+      id: "window-ui-panel-queue-P3",
+      title: "P3",
+      pined: false,
+      open: false,
+      pos: 'bottom',
+      render: () => h('div', 'p3')
+    },
+    {
+      id: "window-ui-panel-queue-P4",
+      title: "p4",
+      pined: false,
+      open: false,
+      pos: 'left',
+      render: () => h('div', 'p4')
+    },
+  ],
+);
 
-  get isPanel() {
-    return true;
-  }
+const spliterRef = ref<InstanceType<typeof Spliter>>()
 
-  getParent() {
-    if (!this.parentId.value) return;
-    return panelMap.get(this.parentId.value) as Group;
-  }
+const spliter = computed(() => spliterRef.value?.spliter)
 
-  add(pos: Pos) {
-    const parent = this.getParent() as Group
-    return parent?.add(pos, this);
-  }
+const panelDialogOpened = ref(new WeakMap())
 
-  moveTo(toPanel: Panel, pos: Pos) {
-    const parent = this.getParent() as Group
-    parent?.move(this, toPanel, pos);
-  }
-
-  remove() {
-    const parent = this.getParent()
-    parent?.remove(this);
-  }
+const openPanel = (panel: Panel) => {
+  panelQueue.filter(p => p.open && p.title !== panel.title).forEach(p => p.open = false)
+  panel.open = true
 }
 
-export class TagsGroup {
-  id: Ref<string> = ref("window-ui-panel-tags-group-" + count++);
-  panels: Ref<Array<Panel>> = ref([]);
-  parentId: Ref<string | undefined> = ref()
-  __isTagsGroup = true;
-
-  constructor({ parent }: { parent?: string } = {}) {
-    panelMap.set(this.id.value, this);
-    this.panels.value = [] as Panel[];
-    this.parentId.value = parent
-  }
- 
-  get isTagsGroup() {
-    return true
-  }
-
-  getParent() {
-    if (!this.parentId.value) return
-    return panelMap.get(this.parentId.value) as Group
-  }
-
-  add(panel: Panel) {
-    this.panels.value.push(panel)
-  }
+const closePanel = (panel: Panel) => {
+  panel.open = false
+  panel.pined = false
   
-  remove(panel: Panel) {
-    const index = this.panels.value.findIndex(p => p.id.value === panel.id.value)
-    if(index > -1) {
-      this.panels.value.splice(index, 1)
+}
 
-      if (this.panels.value.length === 0) {
-        const parent = this.getParent()
-        if (!parent?.isGroup) {
-          return
-        }
-        parent.remove(this)
-      }
-    }
+const removePanel = (panel: Panel) => {
+const index = panelQueue.findIndex(p => p.title === panel.title)
+  if (index > -1) {
+    panelQueue.splice(index, 1)
   }
 }
 
-export class Group {
-  id: Ref<string> = ref("window-ui-panel-group-" + count++);
-  panels: Ref<Array<Panel | Group | TagsGroup>> = ref([]);
-  direction: Ref<PanelDirection>;
-  parentId: Ref<string | undefined> = ref()
-  __isGroup = true;
-  __isRoot?: boolean
+const pinPanel = (panel: Panel) => {
+  panelQueue.filter(p => p.pined && p.pos === panel.pos).forEach(p => p.pined = false)
+  panel.pined = true
 
-  constructor({ direction, parent, isRoot }: { direction?: PanelDirection, parent?: string, isRoot?: boolean } = {}) {
-    panelMap.set(this.id.value, this);
-    this.panels.value = [] as Panel[];
-    this.parentId.value = parent
-    this.direction = ref(direction || "vertical");
-    this.__isRoot = isRoot
-  }
+  spliter.value?.add({
+    pos: panel.pos,
+    addPanel: new SpliterPanel({
+      id: panel.id,
+      title: panel.title
+    })
+  })
+}
 
-  get isRoot() {
-    return this.__isRoot
-  }
 
-  get isGroup() {
-    return true;
-  }
+const unPinById = (panelId: string) => {
+  const panel =panelQueue.find(p => p.id === panelId)
+  panel && unPin(panel)
+}
 
-  get length() {
-    return this.panels.value.length;
-  }
-
-  getParent() {
-    if (!this.parentId.value) return
-    return panelMap.get(this.parentId.value) as Group
-  }
-
-  insert(pos: InsertPos, toPanel?: Panel, addPanel?: Panel) {
-    const added = addPanel || 
-      markRaw(new Panel({
-        parent: this.id.value,
-      }))
-    
-    added.parentId.value = this.id.value
-      
-    if(!toPanel) {
-      pos === "after"
-        ? this.panels.value.push(added)
-        : this.panels.value.unshift(added);
-      return added
-    }
-
-    const index = this.panels.value.findIndex((p) => p.id.value === toPanel.id.value);
-    if(index > -1) {
-      pos === 'after' ?
-      this.panels.value.splice(index + 1, 0, added) :
-      this.panels.value.splice(index, 0, added) 
-    }
-
-    return added
-  }
-
-  toTags(toPanel?: Panel | TagsGroup, addPanel?: Panel) {
-    console.log('tags', toPanel, addPanel)
-
-    const added = addPanel || new Panel({})
-
-    if ((toPanel as TagsGroup)?.isTagsGroup) {
-      const group = toPanel as TagsGroup
-      added.parentId.value = group!.id.value
-      group!.panels.value.push(added)
-      return added
-    }
-
-    const tagsGroup = new TagsGroup({ parent: this.parentId.value })
-    added.parentId.value = tagsGroup.id.value
-    toPanel && this.remove(toPanel)
-    ;(toPanel as Panel)?.isPanel && tagsGroup.panels.value.push((toPanel as Panel))
-    this.panels.value.push(tagsGroup)
-
-    return added
-  }
-
-  add(pos: Pos, toPanel?: Panel | TagsGroup, addPanel?: Panel) {
-    // Tags
-    if(pos === 'tags' || (toPanel as TagsGroup)?.isTagsGroup) {
-      return this.toTags(toPanel, addPanel)
-    }
-
-    const _toPanel = toPanel as Panel
-
-    // Split
-    const dir = posToDirection(pos);
-    const insertTo = insertPos(pos);
-
-    if (dir === this.direction.value) {
-      return this.insert(insertTo, _toPanel, addPanel)
-    }
-
-    if (this.panels.value.length === 1) {
-      this.direction.value = dir
-      return this.insert(insertTo, _toPanel, addPanel)
-    }
-
-    if (toPanel) {
-      return this.panelToGroup(dir, insertTo, _toPanel, addPanel)
-    }
-
-    return this.insert(insertTo, undefined, addPanel)
-  }
-
-  remove(panel: Panel | Group | TagsGroup, clearCache?: boolean) {
-    // 跟容器无法删除
-    if ((panel as Group).isRoot) return
-
-    const parent = panel.getParent()
-
-    if (!parent) return
-
-    const index = parent.panels.value.findIndex(p => panel.id.value === p.id.value)
-    if(index > -1) {
-      parent.panels.value.splice(index, 1)
-      clearCache && panelMap.delete(panel.id.value)
-
-      // 如果无panel, 则删除自己
-      if(parent.panels.value.length === 0) {
-        parent.getParent()?.remove(this)
-        panelMap.delete(this.id.value)
-      }
-    }
-  }
-
-  move(fromPanel: Panel, toPanel: Panel, pos: Pos) {    
-      fromPanel.remove()
-        const toGroup = toPanel.getParent() as Group
-        toGroup.add(pos, toPanel, fromPanel)
-  }
-
-  panelToGroup(direction: PanelDirection, insertTo: InsertPos, panel: Panel, addPanel?: Panel) {
-    console.log(1)
-      const addedGroup = markRaw(new Group({ direction, parent: this.id.value }));
-      const addedPanel = addPanel || markRaw(new Panel({ parent: addedGroup.id.value }))
-      addedPanel.parentId.value = addedGroup.id.value
-      const index = this.panels.value.findIndex((p) => p.id.value === panel.id.value);
-      if (index > -1) {
-        addedGroup.panels.value =
-          insertTo === "after"
-            ? [panel, addedPanel]
-            : [addedPanel, panel];
-        panel.parentId.value = addedGroup.id.value;
-        this.panels.value.splice(index, 1, addedGroup);
-      }
-
-      return addedPanel
-  }
-
-  wrap(pos: Pos, dir: PanelDirection) {
-    const old = this.panels.value;
-    const insertTo = insertPos(pos);
-    const wrapper = markRaw(new Group({ parent: this.id.value }));
-    const added = 
-      markRaw(new Panel({
-        parent: this.id.value,
-      }))
-    wrapper.panels.value = [...old.map(p => { (p as Panel).parentId.value = wrapper.id.value; return p;})];
-    wrapper.direction.value = this.direction.value
-    this.direction.value = dir;
-    this.panels.value =
-      insertTo == "after" ? [wrapper, added] : [added, wrapper];
-
-    return wrapper
-  }
+const unPin = (panel: Panel) => {
+  panel.pined = false
+  spliter.value?.removeById(panel.id)
 }
 
 export type PanelContext = {
-  isDrag: Ref<boolean>
-  dragPanel: ShallowRef<Panel | undefined>
-  hoverPanel: ShallowRef<Panel | undefined>
-  startDrag: (panel: Panel) => void
-  onHover: (panel: Panel) => void
+  unPinById: typeof unPinById
 }
 
-export const [injectPanelContext, providePanelContext] = createContext<PanelContext>('Panel')
+export const [injectPanelContext, providePanelContext] =
+  createContext<PanelContext>("Panel");
+
+watchOnce(() => spliter.value, () => {
+  spliter.value?.add({
+    pos: 'left',
+    addPanel: markRaw(new SpliterPanel({
+      id: '--window-ui-splilter-flow-editor',
+      hasHeader: false,
+      tagEnable: false
+    }))
+  })
+})
 
 export const usePanel = () => {
-  /**初始化全局参数 */
-  count = 0
-  panelMap.clear()
-
-  const group = markRaw(new Group({ isRoot: true }));
-  const addPanel = (pos: Pos) => {
-    const rootDir = group.direction.value;
-    const newDir = posToDirection(pos);
-
-    if (group.panels.value.length === 0) {
-      group.add(pos);
-      return;
-    }
-
-    if (rootDir === newDir) {
-      group.add(pos);
-      return;
-    }
-
-    if (group.panels.value.length == 1) {
-      group.direction.value = newDir
-      group.add(pos)
-      return
-    }
-
-    group.wrap(pos, newDir);
-  };
-
   return {
-    group,
-    addPanel,
+    spliterRef,
+    panelQueue,
+    openPanel,
+    closePanel,
+    removePanel,
+    pinPanel,
+    unPin,
+    unPinById
   };
-};
+}

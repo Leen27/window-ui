@@ -1,3 +1,8 @@
+<script setup lang="ts">
+
+</script>
 <template>
-  <w-panel />
+  <div class="w-full h-screen">
+    <w-panel />
+  </div>
 </template>

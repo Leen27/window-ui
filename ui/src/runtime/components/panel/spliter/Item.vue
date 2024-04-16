@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Splitpanes, Pane } from 'splitpanes'
-import { Panel, type Group, injectPanelContext, TagsGroup} from '../../composables/use-panel'
+import { Panel, type Group, TagsGroup} from '../../../composables/use-panel-spliter'
 import { computed } from 'vue';
 import PanelTags from './Tags.vue'
 import PanelContent from './Content.vue'
@@ -26,7 +26,6 @@ const panels = computed(() => props.group.panels.value.filter(p => (p as Panel).
       :key="panel.id"
       class="w-full h-full"
     >
-      {{ panel.id }} #
       <Item
         v-if="(panel as Group).isGroup && ((panel as Group).panels.value?.length > 0)"
         :group="panel as Group"

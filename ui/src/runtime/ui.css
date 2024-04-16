@@ -6,11 +6,16 @@
   :root {
     /* base */
     --color-primary: 255 115 179;
+    --color-primary-foreground: 51 65 85; 
     --color-secondary: 111 114 185;
 
     --color-background: 227 227 227;
 
     /* resizer */
     --window-ui-resizer-border: 150 150 150;    
+
+    --radius: 0.2rem;
+
+    --ring: #aaa;
   }
 }

@@ -85,11 +85,20 @@ export default defineNuxtModule<ModuleOptions>({
         tailwindConfig.theme.extend.colors || {};
       tailwindConfig.theme.extend.colors = {
         ...tailwindConfig.theme.extend.colors,
-        primary: "rgb(var(--color-primary) / <alpha-value>)",
+        primary: {
+          DEFAULT: "rgb(var(--color-primary) / <alpha-value>)",
+          foreground: "rgb(var(--color-primary-foreground) / <alpha-value>)",
+        },
         background: "rgb(var(--color-background) / <alpha-value>)",
         resizer: {
           "shadow-border":
             "rgb(var(--window-ui-resizer-border) / <alpha-value>)",
+        },
+        borderRadius: {
+          xl: 'calc(var(--radius) + 4px)',
+          lg: 'var(--radius)',
+          md: 'calc(var(--radius) - 2px)',
+          sm: 'calc(var(--radius) - 4px)',
         },
       };
     });
