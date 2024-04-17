@@ -18,7 +18,6 @@ const { onHover } =injectPanelSpliterContext()
       v-if="panel.hasHeader"
       :panel="panel as Panel"
     />
-    {{ panel }}
     <!-- <div>
       <w-button @click="(panel as Panel).add('left')">
         left

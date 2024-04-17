@@ -120,10 +120,13 @@ watchEffect(() => {
   }
 })
 
+const activePanel = computed(() => panelQueue.filter(i => i.open && !i.pined))
+
 export const usePanel = () => {
   return {
     spliterRef,
     panelQueue,
+    activePanel,
     openPanel,
     closePanel,
     removePanel,
