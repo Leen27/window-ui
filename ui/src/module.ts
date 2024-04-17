@@ -9,6 +9,7 @@ import {
 } from "@nuxt/kit";
 // @ts-ignore
 import { createRequire } from "node:module";
+import { fontFamily } from "tailwindcss/defaultTheme";
 
 const _require = createRequire(import.meta.url);
 const defaultColors = _require("tailwindcss/colors.js");
@@ -80,7 +81,22 @@ export default defineNuxtModule<ModuleOptions>({
     // @ts-ignore - Module might not exist
     nuxt.hook("tailwindcss:config", async (tailwindConfig) => {
       tailwindConfig.theme = tailwindConfig.theme || {};
-      tailwindConfig.theme.extend = tailwindConfig.theme.extend || {};
+      tailwindConfig.theme.extend = tailwindConfig.theme.extend || {
+        container: {
+          center: true,
+          padding: {
+            DEFAULT: "1rem",
+            sm: "2rem",
+            lg: "4rem",
+            xl: "5rem",
+            "2xl": "6rem",
+          },
+        },
+        fontFamily: {
+          sans: ["Inter var", ...fontFamily.sans],
+          mono: ["'Space Mono'", ...fontFamily.mono],
+        },  
+      };
       tailwindConfig.theme.extend.colors =
         tailwindConfig.theme.extend.colors || {};
       tailwindConfig.theme.extend.colors = {
