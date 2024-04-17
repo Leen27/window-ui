@@ -5,7 +5,7 @@
 @layer base {
   :root {
     /* base */
-    --color-primary: 255 115 179;
+    --color-primary: 125 211 252;
     --color-primary-foreground: 51 65 85; 
     --color-secondary: 111 114 185;
 
@@ -17,5 +17,18 @@
     --radius: 0.2rem;
 
     --ring: #aaa;
+
+    --text-size: 12px;
+    --text-color: 51 65 85;
+
+    /* table */
+    --table-header-background: 230 230 230;
+    --table-border-color: 180 180 180;
+  }
+}
+
+@layer base {
+  body {
+    @apply bg-white text-[12px] text-text selection:bg-primary selection:text-primary-foreground;
   }
 }

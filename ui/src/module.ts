@@ -80,8 +80,16 @@ export default defineNuxtModule<ModuleOptions>({
     // @nuxtjs/tailwindcss support
     // @ts-ignore - Module might not exist
     nuxt.hook("tailwindcss:config", async (tailwindConfig) => {
-      tailwindConfig.theme = tailwindConfig.theme || {};
-      tailwindConfig.theme.extend = tailwindConfig.theme.extend || {
+      tailwindConfig.theme = tailwindConfig.theme || {
+      };
+      tailwindConfig.theme.extend = {
+        ...tailwindConfig.theme.extend,
+        fontSize: {
+          sm: ['12px', '16px'],
+          base: ['16px', '24px'],
+          lg: ['20px', '28px'],
+          xl: ['24px', '32px'],
+        }, 
         container: {
           center: true,
           padding: {
@@ -101,6 +109,9 @@ export default defineNuxtModule<ModuleOptions>({
         tailwindConfig.theme.extend.colors || {};
       tailwindConfig.theme.extend.colors = {
         ...tailwindConfig.theme.extend.colors,
+        text: {
+          DEFAULT: "rgb(var(--text-color) / <alpha-value>)",
+        },
         primary: {
           DEFAULT: "rgb(var(--color-primary) / <alpha-value>)",
           foreground: "rgb(var(--color-primary-foreground) / <alpha-value>)",
@@ -116,6 +127,10 @@ export default defineNuxtModule<ModuleOptions>({
           md: 'calc(var(--radius) - 2px)',
           sm: 'calc(var(--radius) - 4px)',
         },
+        table: {
+          header: 'rgb(var(--table-header-background) / <alpha-value>)',
+          border: 'rgb(var(--table-border-color) / <alpha-value>)'
+        }
       };
     });
 
