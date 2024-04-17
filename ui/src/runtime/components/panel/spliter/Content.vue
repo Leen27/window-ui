@@ -14,12 +14,12 @@ const { onHover } =injectPanelSpliterContext()
     class="relative w-full h-full"
     @mouseenter="onHover(panel as Panel)"
   >
-    {{ panel }}
     <PanelHader
       v-if="panel.hasHeader"
       :panel="panel as Panel"
     />
-    <div class="">
+    {{ panel }}
+    <!-- <div>
       <w-button @click="(panel as Panel).add('left')">
         left
       </w-button>
@@ -36,5 +36,6 @@ const { onHover } =injectPanelSpliterContext()
         bottom
       </w-button>
     </div>
+  </div> -->
   </div>
 </template>

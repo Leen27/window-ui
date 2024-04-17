@@ -5,7 +5,7 @@ import { type Panel as GPanel } from '../../../composables/use-panel';
 import PanelNav from './Nav.vue'
 import PanelItem from './Item.vue'
 
-const { group } = usePanelSpliter()
+const { group, addPanel } = usePanelSpliter()
 
 const isDrag = ref(false)
 const dragPanel = shallowRef<Panel | undefined>()
@@ -59,23 +59,24 @@ providePanelSpliterContext({
 })
 
 defineExpose({
-  spliter: group
+  spliter: group,
+  addPanel
 })
 </script>
 <template>
   <ClientOnly>
-    <!-- <w-button @click="addPanel('left')">
+    <!--<w-button @click="addPanel({pos: 'left'})">
       left
     </w-button>
-    <w-button @click="addPanel('right')">
+    <w-button @click="addPanel({pos: 'right'})">
       right 
     </w-button>
-    <w-button @click="addPanel('top')">
+    <w-button @click="addPanel({pos: 'top'})">
       top
     </w-button>
-    <w-button @click="addPanel('bottom')">
+    <w-button @click="addPanel({ pos: 'bottom' })">
       bottom 
-    </w-button> -->
+    </w-button>-->
     <div class="h-full">
       <PanelNav /> 
       <PanelItem :group="group" /> 

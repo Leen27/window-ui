@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import {usePanel, injectPanelContext } from '../../composables/use-panel'
+import {usePanel } from '../../composables/use-panel'
 import {cva} from 'class-variance-authority'
 
 type Props = {

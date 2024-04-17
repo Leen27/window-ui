@@ -238,8 +238,6 @@ export class Group implements IPanelGroup {
   }
 
   toTags(toPanel?: Panel | TagsGroup, addPanel?: Panel): Panel {
-    console.log("tags", toPanel, addPanel);
-
     const added = markRaw(addPanel || new Panel({}));
 
     if ((toPanel as TagsGroup)?.isTagsGroup) {
@@ -445,23 +443,23 @@ export const usePanelSpliter = () => {
 
   const group = markRaw(new Group({ isRoot: true }));
 
-  const addPanel = (pos: Pos) => {
+  const addPanel = ({pos, addPanel}: {pos: Pos, addPanel?: Panel}) => {
     const rootDir = group.direction.value;
     const newDir = posToDirection(pos);
 
     if (group.panels.value.length === 0) {
-      group.add({ pos });
+      group.add({ pos, addPanel });
       return;
     }
 
     if (rootDir === newDir) {
-      group.add({ pos });
+      group.add({ pos, addPanel });
       return;
     }
 
     if (group.panels.value.length == 1) {
       group.direction.value = newDir;
-      group.add({ pos });
+      group.add({ pos, addPanel });
       return;
     }
 

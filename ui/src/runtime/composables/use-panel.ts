@@ -1,8 +1,7 @@
 import { createContext } from "radix-vue";
-import { reactive, ref, toRefs, type DefineComponent, type AsyncComponentLoader, h, type VNode } from "vue";
+import { reactive, ref, type DefineComponent, h, type VNode, watchEffect } from "vue";
 import Spliter from '../components/panel/spliter/index.vue'
 import { Panel as SpliterPanel } from './use-panel-spliter'
-import { watchOnce } from "@vueuse/core";
 
 export type Panel = {
   id: string
@@ -49,15 +48,13 @@ const panelQueue = reactive<PanelQueue>([
       open: false,
       pos: 'left',
       render: () => h('div', 'p4')
-    },
+    }
   ],
 );
 
 const spliterRef = ref<InstanceType<typeof Spliter>>()
 
 const spliter = computed(() => spliterRef.value?.spliter)
-
-const panelDialogOpened = ref(new WeakMap())
 
 const openPanel = (panel: Panel) => {
   panelQueue.filter(p => p.open && p.title !== panel.title).forEach(p => p.open = false)
@@ -78,10 +75,8 @@ const index = panelQueue.findIndex(p => p.title === panel.title)
 }
 
 const pinPanel = (panel: Panel) => {
-  panelQueue.filter(p => p.pined && p.pos === panel.pos).forEach(p => p.pined = false)
   panel.pined = true
-
-  spliter.value?.add({
+  spliterRef.value?.addPanel({
     pos: panel.pos,
     addPanel: new SpliterPanel({
       id: panel.id,
@@ -92,7 +87,7 @@ const pinPanel = (panel: Panel) => {
 
 
 const unPinById = (panelId: string) => {
-  const panel =panelQueue.find(p => p.id === panelId)
+  const panel = panelQueue.find(p => p.id === panelId)
   panel && unPin(panel)
 }
 
@@ -108,15 +103,21 @@ export type PanelContext = {
 export const [injectPanelContext, providePanelContext] =
   createContext<PanelContext>("Panel");
 
-watchOnce(() => spliter.value, () => {
-  spliter.value?.add({
-    pos: 'left',
-    addPanel: markRaw(new SpliterPanel({
-      id: '--window-ui-splilter-flow-editor',
-      hasHeader: false,
-      tagEnable: false
-    }))
-  })
+/**
+ * 默认添加一个spliter 作为画布容器,
+ * 无法成为 tagsgroup, 没有 header
+ */
+watchEffect(() => {
+  if (spliter.value?.length === 0) {
+    spliterRef.value?.addPanel({
+      pos: 'left',
+      addPanel: markRaw(new SpliterPanel({
+        id: '--window-ui-splilter-flow-editor',
+        hasHeader: false,
+        tagEnable: false
+      }))
+    })
+  }
 })
 
 export const usePanel = () => {

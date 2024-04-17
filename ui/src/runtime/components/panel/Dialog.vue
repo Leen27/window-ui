@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { usePanel, type Panel } from '../../composables/use-panel';
-import PanelHeader from './spliter/Header.vue'
 import {Splitpanes, Pane} from 'splitpanes'
 import { cva } from 'class-variance-authority';
 type Props = {
@@ -24,9 +23,11 @@ const telportPos = computed(() => ({
   'right': '#--splitter-main-dialog-panel-2'
 }[pos.value]))
 
-const { closePanel, pinPanel, unPin } = usePanel()
+const { closePanel } = usePanel()
 
 const panel1 = ref()
+const PANEL_ID_1 = '--splitter-main-dialog-panel-1'
+const PANEL_ID_2 = '--splitter-main-dialog-panel-2'
 const panel2 = ref()
 
 const getRole = (panelId: string) => telportPos.value === panelId ? 'dialog' : 'layer'
@@ -57,65 +58,30 @@ const panelVariants = cva(
       style="height: 100%;"
     >
       <pane
-        id="--splitter-main-dialog-panel-1"
+        :id="PANEL_ID_1"
         ref="panel1"
         max-size="90"
-        :class="panelVariants({ role:getRole('#--splitter-main-dialog-panel-1') })"
-        @click="handleClickPanel('#--splitter-main-dialog-panel-1')"
-      />
+        :class="panelVariants({ role: getRole('#' + PANEL_ID_1) })"
+        @click="handleClickPanel('#' + PANEL_ID_1)"
+      >
+        <div
+          v-if="'dialog' === getRole('#' + PANEL_ID_1)"
+          :id="panel.id + '-dialog'"
+          class="w-full h-full"
+        /> 
+      </pane>
       <pane
-        id="--splitter-main-dialog-panel-2"
+        :id="PANEL_ID_2"
         ref="panel2"
-        :class="panelVariants({ role:getRole('#--splitter-main-dialog-panel-2') })"
-        @click="handleClickPanel('#--splitter-main-dialog-panel-2')"
-      />
-    </splitpanes>
-    <!-- 
-    <splitter-group :direction="splitDirection">
-      <splitter-panel
-        id="--splitter-main-dialog-panel-1"
-        ref="panel1"
-        :data-role="getRole('#--splitter-main-dialog-panel-1')"
-        :class="panelVariants({ role:getRole('#--splitter-main-dialog-panel-1') })"
-        @click="handleClickPanel('#--splitter-main-dialog-panel-1')"
+        :class="panelVariants({ role:getRole('#'+PANEL_ID_2) })"
+        @click="handleClickPanel('#'+PANEL_ID_2)"
       >
-      
-      </splitter-panel>
-      <splitter-resize-handle :class="resizeHandleStyle({direction: splitDirection })" />
-      <splitter-panel
-        id="--splitter-main-dialog-panel-2"
-        ref="panel2"
-        :data-role="getRole('#--splitter-main-dialog-panel-2')"
-        :class="panelVariants({ role:getRole('#--splitter-main-dialog-panel-2') })"
-        @click="handleClickPanel('#--splitter-main-dialog-panel-2')"
-      >
-      
-      </splitter-panel>
-    </splitter-group> -->
-
-    <Teleport
-      v-if="panel1 && panel2"
-      :to="telportPos"
-    >
-      <div
-        class="bg-primary w-full h-[40px] select-none gap-3"
-      >
-        {{ panel.title }}
-        <span
-          class="text-white"
-          @mousedown.stop="() => closePanel(panel)"
-        >X</span>
-        <span
-          class="text-white"
-          @mousedown.stop="() => panel.pined ? unPin(panel) : pinPanel(panel)"
-        >{{ panel.pined ? '⬇️' : '⬅️' }}</span>
-      </div>
-      <div class="w-full h-full overflow-scroll">
-        <component
-          :is="panel.render"
-          v-if="panel?.render"
+        <div
+          v-if="'dialog' === getRole('#'+PANEL_ID_2)"
+          :id="panel.id+'-dialog'"
+          class="w-full h-full"
         />
-      </div>
-    </Teleport>
+      </pane>
+    </splitpanes>
   </div>
 </template>
