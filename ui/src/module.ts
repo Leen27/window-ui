@@ -83,7 +83,6 @@ export default defineNuxtModule<ModuleOptions>({
       tailwindConfig.theme = tailwindConfig.theme || {
       };
       tailwindConfig.theme.extend = {
-        ...tailwindConfig.theme.extend,
         fontSize: {
           sm: ['12px', '16px'],
           base: ['16px', '24px'],
@@ -103,12 +102,41 @@ export default defineNuxtModule<ModuleOptions>({
         fontFamily: {
           sans: ["Inter var", ...fontFamily.sans],
           mono: ["'Space Mono'", ...fontFamily.mono],
-        },  
+        },
+        ...tailwindConfig.theme.extend,
       };
+
+      tailwindConfig.theme.extend.keyframes = {
+        'accordion-down': {
+          from: { height: 0 },
+          to: { height: 'var(--radix-accordion-content-height)' },
+        },
+        'accordion-up': {
+          from: { height: 'var(--radix-accordion-content-height)' },
+          to: { height: 0 },
+        },
+        'collapsible-down': {
+          from: { height: 0 },
+          to: { height: 'var(--radix-collapsible-content-height)' },
+        },
+        'collapsible-up': {
+          from: { height: 'var(--radix-collapsible-content-height)' },
+          to: { height: 0 },
+        },
+        ...tailwindConfig.theme.extend.keyframes
+      },
+      tailwindConfig.theme.extend.animation = {
+        'accordion-down': 'accordion-down 0.2s ease-in-out',
+        'accordion-up': 'accordion-up 0.2s ease-in-out',
+        'collapsible-down': 'collapsible-down 0.2s ease-in-out',
+        'collapsible-up': 'collapsible-up 0.2s ease-in-out',
+        ...tailwindConfig.theme.extend.animation
+      }
       tailwindConfig.theme.extend.colors =
         tailwindConfig.theme.extend.colors || {};
       tailwindConfig.theme.extend.colors = {
         ...tailwindConfig.theme.extend.colors,
+        input: 'hsl(var(--input))',
         text: {
           DEFAULT: "rgb(var(--text-color) / <alpha-value>)",
         },
@@ -126,6 +154,14 @@ export default defineNuxtModule<ModuleOptions>({
           lg: 'var(--radius)',
           md: 'calc(var(--radius) - 2px)',
           sm: 'calc(var(--radius) - 4px)',
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
         },
         table: {
           header: 'rgb(var(--table-header-background) / <alpha-value>)',
@@ -145,6 +181,7 @@ export default defineNuxtModule<ModuleOptions>({
           require("@tailwindcss/aspect-ratio"),
           require("@tailwindcss/typography"),
           require("@tailwindcss/container-queries"),
+          require("tailwindcss-animate")
         ],
         content: {
           files: [

@@ -1,108 +1,474 @@
-<script setup lang="ts" generic="TData, TValue">
-import { type ColumnDef, type Row, type Table,
+<template>
+  <div>
+    <div :class="cn('w-full overflow-x-auto', props.class)">
+      <WTable :class="tableClass">
+        <WTableHeader>
+          <WTableRow
+            v-for="headerGroup in table.getHeaderGroups()"
+            :key="headerGroup.id"
+          >
+            <WTableHead
+              v-for="header in headerGroup.headers"
+              :key="header.id"
+              :colspan="header.colSpan"
+              :class="[
+                'relative',
+                header.column.getCanSort() && 'cursor-pointer select-none',
+              ]"
+              :style="{
+                width: `${header.getSize()}px`
+              }"
+              @click="header.column.getToggleSortingHandler()"
+            >
+              <template v-if="!header.isPlaceholder">
+                <div class="flex items-center gap-3">
+                  <FlexRender
+                    :render="header.column.columnDef.header"
+                    :props="header.getContext()"
+                  />
+
+                  <svg
+                    v-if="
+                      header.column.getCanSort() &&
+                        header.column.getIsSorted() === 'asc'
+                    "
+                    class="h-4 w-4"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.5"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="m4.5 15.75 7.5-7.5 7.5 7.5"
+                    />
+                  </svg>
+                  <svg
+                    v-else-if="
+                      header.column.getCanSort() &&
+                        header.column.getIsSorted() === 'desc'
+                    "
+                    class="h-4 w-4"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.5"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="m19.5 8.25-7.5 7.5-7.5-7.5"
+                    />
+                  </svg>
+
+                  <svg
+                    v-else-if="
+                      header.column.getCanSort() && !header.column.getIsSorted()
+                    "
+                    class="h-4 w-4"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.5"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"
+                    />
+                  </svg>
+                </div>
+              </template>
+              <div
+                :class="['@apply absolute h-full w-[5px] cursor-col-resize select-none touch-none right-0 top-0 bg-primary hover:opacity-1', header.column.getIsResizing() ? 'isResizing' : '']"
+                :style="{
+                  transform:
+                    header.column.getIsResizing()
+                      ? `translateX(${
+                        table.getState().columnSizingInfo
+                          .deltaOffset
+                      }px)`
+                      : '',
+                }"
+                @mousedown="header.getResizeHandler()?.($event)"
+                @touchstart="header.getResizeHandler()?.($event)"
+              />
+            </WTableHead>
+          </WTableRow>
+        </WTableHeader>
+
+        <WTableBody>
+          <WTableRow
+            v-for="row in table.getRowModel().rows"
+            :key="row.id"
+            :data-state="row.getIsSelected() ? 'selected' : ''"
+          >
+            <WTableCell
+              v-for="cell in row.getVisibleCells()"
+              :key="cell.id"
+            >
+              <FlexRender
+                :render="cell.column.columnDef.cell"
+                :props="cell.getContext()"
+              />
+            </WTableCell>
+          </WTableRow>
+
+          <WTableEmpty
+            v-if="table.getRowModel().rows.length === 0"
+            :colspan="table.getAllLeafColumns().length"
+          >
+            <slot
+              :table="table"
+              name="empty"
+            >
+              No data available.
+            </slot>
+          </WTableEmpty>
+        </WTableBody>
+      </WTable>
+    </div>
+
+    <div
+      v-if="showPagination"
+      class="my-6 flex flex-col justify-between gap-4 px-2 md:flex-row md:items-center"
+    >
+      <div class="flex items-center justify-between gap-3">
+        <slot
+          name="rowsSelected"
+          :table="table"
+        >
+          <div
+            v-if="showSelect"
+            class="whitespace-nowrap text-sm text-muted-foreground"
+          >
+            <span>
+              {{ table.getFilteredSelectedRowModel().rows.length }} of
+              {{ " " }} {{ table.getFilteredRowModel().rows.length }} row(s)
+              selected
+            </span>
+          </div>
+        </slot>
+        <slot
+          name="rowsPerPage"
+          :table="table"
+        >
+          <div class="flex items-center space-x-2 whitespace-nowrap">
+            <p
+              class="hidden text-sm font-medium text-foreground md:inline-block"
+            >
+              {{ rowsPerPageText }}
+            </p>
+            <WSelect v-model="pageSizeModel">
+              <WSelectTrigger class="h-9 w-[70px]">
+                {{ table.getState().pagination.pageSize }}
+              </WSelectTrigger>
+              <WSelectContent
+                side="top"
+                align="start"
+              >
+                <WSelectGroup>
+                  <WSelectItem
+                    v-for="pageSize in pageSizes"
+                    :key="pageSize"
+                    :value="`${pageSize}`"
+                  >
+                    {{ pageSize }}
+                  </WSelectItem>
+                </WSelectGroup>
+              </WSelectContent>
+            </WSelect>
+          </div>
+        </slot>
+      </div>
+
+      <div class="flex items-center justify-between gap-3">
+        <slot
+          :table="table"
+          name="page"
+        >
+          <div
+            class="flex items-center justify-center whitespace-nowrap text-sm font-medium text-foreground"
+          >
+            Page {{ table.getState().pagination.pageIndex + 1 }} of
+            {{ table.getPageCount() }}
+          </div>
+        </slot>
+
+        <slot
+          :table="table"
+          name="pageButtons"
+        >
+          <div class="flex items-center space-x-2">
+            <WButton
+              variant="outline"
+              title="First page"
+              class="h-9 w-9 p-0"
+              :disabled="!table.getCanPreviousPage()"
+              @click="table.setPageIndex(0)"
+            >
+              <svg
+
+                class="h-4 w-4"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M15.75 19.5 8.25 12l7.5-7.5"
+                />
+              </svg>
+            </WButton>
+            <WButton
+              variant="outline"
+              title="Previous page"
+              class="h-9 w-9 p-0"
+              :disabled="!table.getCanPreviousPage()"
+              @click="table.previousPage()"
+            >
+              <svg
+
+                class="h-4 w-4"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M15.75 19.5 8.25 12l7.5-7.5"
+                />
+              </svg>
+            </WButton>
+            <WButton
+              variant="outline"
+              title="Next page"
+              class="h-9 w-9 p-0"
+              :disabled="!table.getCanNextPage()"
+              @click="table.nextPage()"
+            >
+              <svg
+                class="h-4 w-4"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="m8.25 4.5 7.5 7.5-7.5 7.5"
+                />
+              </svg>
+            </WButton>
+            <WButton
+              variant="outline"
+              title="Last page"
+              class="h-9 w-9 p-0"
+              :disabled="!table.getCanNextPage()"
+              @click="table.setPageIndex(table.getPageCount() - 1)"
+            >
+              <svg
+                class="h-4 w-4"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="m8.25 4.5 7.5 7.5-7.5 7.5"
+                />
+              </svg>
+            </WButton>
+          </div>
+        </slot>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script lang="ts" setup generic="T">
+import CheckBox from "../checkbox/index.vue";
+import {
   FlexRender,
   getCoreRowModel,
-  useVueTable
-} from '@tanstack/vue-table'
-import { h, ref, type HTMLAttributes } from 'vue';
-import Checkbox from '../checkbox/index.vue'
-import { valueUpdater } from '../../ui.config/data-table'
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useVueTable,
+} from "@tanstack/vue-table";
+import type { ColumnDef, SortingState, Table } from "@tanstack/vue-table";
+import { cn } from "../../utils";
 
-type Props = {
-  columns: ColumnDef<TData, TValue>[]
-  data: TData[]
-  class?: HTMLAttributes['class']
-  checkable?: boolean
-  onClickCell?: (row: Row<TData>) => void
-}
+const props = withDefaults(
+  defineProps<{
+    data?: T[];
+    columns?: ColumnDef<T>[];
+    search?: string;
+    showSelect?: boolean;
+    pageSizes?: number[];
+    pageSize?: number;
+    sorting?: SortingState;
+    tableClass?: any;
+    ascIcon?: string;
+    descIcon?: string;
+    unsortedIcon?: string;
+    class?: any;
+    showPagination?: boolean;
+    rowsPerPageText?: string;
+  }>(),
+  {
+    pageSizes: () => [10, 20, 30, 40, 50, 100],
+    pageSize: () => 10,
+    columns: () => [],
+    data: () => [],
+    sorting: () => [],
+    ascIcon: "heroicons:chevron-up",
+    descIcon: "heroicons:chevron-down",
+    unsortedIcon: "heroicons:chevron-up-down",
+    showPagination: true,
+    rowsPerPageText: "Rows per page:",
+  },
+);
 
-const props = defineProps<Props>()
+defineOptions({ inheritAttrs: false });
 
-const rowSelection = ref({})
-
-const checkColDef: ColumnDef<TData> = {
-  id: 'select',
-  header: ({table}) => h(Checkbox, {
-    'checked': table.getIsAllPageRowsSelected(),
-    'onUpdate:checked': (value: boolean) => table.toggleAllPageRowsSelected(!!value),
-    'ariaLable': 'Select all'
-  }),
-  cell: ({row}) => h(Checkbox, {
-    'checked': row.getIsSelected(),
-    'onUpdate:checked': (value: boolean) => row.toggleSelected(!!value),
-    'ariaLabel': 'Select row'
-  }),
+const checkBoxHeader: ColumnDef<any> = {
+  id: "checkbox",
+  header: ({ table }) => {
+    return h(
+      "div",
+      { class: "flex items-center justify-center" },
+      h(CheckBox, {
+        checked: table.getIsAllRowsSelected()
+          ? true
+          : table.getIsSomeRowsSelected()
+          ? "indeterminate"
+          : false,
+        "onUpdate:checked": (value: boolean) =>
+          table.toggleAllPageRowsSelected(!!value),
+        ariaLabel: "Select all",
+      }),
+    );
+  },
+  cell: ({ row }) => {
+    return h(
+      "div",
+      { class: "flex items-center justify-center " },
+      h(CheckBox, {
+        checked: row.getIsSelected(),
+        "onUpdate:checked": (value) => row.toggleSelected(!!value),
+        ariaLabel: "Select row",
+      }),
+    );
+  },
   enableSorting: false,
-  enableHiding: false
+  enableHiding: false,
+};
+
+const localColumns: ColumnDef<T>[] = [...props.columns];
+
+if (props.showSelect) {
+  localColumns.unshift(checkBoxHeader);
 }
+
+const emit = defineEmits<{
+  ready: [table: Table<T>];
+}>();
+
+const localSorting = ref(props.sorting);
+const globalFilter = ref(props.search);
+const columnVisibility = ref({});
+const rowSelection = ref({});
 
 const table = useVueTable({
-  get data() { return props.data },
-  get columns() { return props.checkable ? [checkColDef, ...props.columns] : props.columns },
-  getCoreRowModel: getCoreRowModel(),
-  enableRowSelection: true,
-  onRowSelectionChange: updateOrValue => valueUpdater(updateOrValue, rowSelection),
+  get data() {
+    return props.data;
+  },
+  get columns() {
+    return localColumns;
+  },
+  initialState: {
+    pagination: {
+      pageSize: props.pageSize,
+    },
+    rowSelection: rowSelection.value,
+    globalFilter: props.search,
+  },
   state: {
-    get rowSelection() { return rowSelection.value }
-  }
-})
+    get sorting() {
+      return localSorting.value;
+    },
+    get globalFilter() {
+      return props.search;
+    },
+    get columnVisibility() {
+      return columnVisibility.value;
+    },
+    get rowSelection() {
+      return rowSelection.value;
+    },
+  },
+  onSortingChange: (updaterOrValue) => {
+    localSorting.value =
+      typeof updaterOrValue === "function"
+        ? updaterOrValue(localSorting.value)
+        : updaterOrValue;
+  },
+  onGlobalFilterChange: (updaterOrValue) => {
+    globalFilter.value =
+      typeof updaterOrValue === "function"
+        ? updaterOrValue(globalFilter.value)
+        : updaterOrValue;
+  },
+  onRowSelectionChange: (updaterOrValue) => {
+    rowSelection.value =
+      typeof updaterOrValue === "function"
+        ? updaterOrValue(rowSelection.value)
+        : updaterOrValue;
+  },
+  columnResizeMode: 'onChange', //change column resize mode to "onChange"
+  getCoreRowModel: getCoreRowModel(),
+  getSortedRowModel: getSortedRowModel(),
+  getPaginationRowModel: getPaginationRowModel(),
+  getFilteredRowModel: getFilteredRowModel(),
+  enableRowSelection: () => !!props.showSelect,
+});
 
-const handleCellClick = (row: Row<TData>) => {
-  props.onClickCell && props.onClickCell(row)
+function toggleColumnVisibility(column: any) {
+  columnVisibility.value = {
+    ...columnVisibility.value,
+    [column.id]: !column.getIsVisible(),
+  };
 }
 
-defineExpose({
-  table
-})
+const pageSizeModel = computed({
+  get() {
+    return table.getState().pagination.pageSize.toString();
+  },
+  set(value) {
+    table.setPageSize(Number(value));
+  },
+});
+
+onMounted(() => {
+  emit("ready", table);
+});
+
+defineExpose({ toggleColumnVisibility });
 </script>
-<template>
-  <w-table :class="props.class">
-    <w-table-header class="sticky">
-      <w-table-row
-        v-for="headerGroup in table.getHeaderGroups()"
-        :key="headerGroup.id"
-      >
-        <U-table-head
-          v-for="header in headerGroup.headers"
-          :key="header.id"
-        >
-          <flex-render
-            v-if="!header.isPlaceholder"
-            :render="header.column.columnDef.header"
-            :props="header.getContext()"
-          />
-        </U-table-head>
-      </w-table-row>
-    </w-table-header>
-    <w-table-body :lass="'min-h-5 overflow-y-scroll'">
-      <template v-if="table.getRowModel().rows?.length">
-        <w-table-row
-          v-for="row in table.getRowModel().rows"
-          :key="row.id"
-          :data-state="row.getIsSelected() ? 'selected' : undefined"
-        >
-          <w-table-cell
-            v-for="cell in row.getVisibleCells()"
-            :key="cell.id"
-            @click="handleCellClick(row)"
-          >
-            <FlexRender
-              :render="cell.column.columnDef.cell"
-              :props="cell.getContext()"
-            />
-          </w-table-cell>
-        </w-table-row>
-      </template>
-      <template v-else>
-        <w-table-row>
-          <w-table-cell
-            :col-span="columns.length"
-            class="h-24 text-center"
-          >
-            NO Data.
-          </w-table-cell>
-        </w-table-row>
-      </template>
-    </w-table-body>
-  </w-table>
-</template>
+

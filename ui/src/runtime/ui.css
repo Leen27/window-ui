@@ -24,6 +24,16 @@
     /* table */
     --table-header-background: 230 230 230;
     --table-border-color: 180 180 180;
+    
+    /** pop */
+    --popover: 0 0% 100%;
+		--popover-foreground: 240 10% 3.9%;
+
+    --accent: 240 4.8% 95.9%;
+		--accent-foreground: 240 5.9% 10%;
+
+    /** form */
+    --input: 240 5.9% 90%;
   }
 }
 
