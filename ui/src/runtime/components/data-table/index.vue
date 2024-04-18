@@ -12,13 +12,13 @@
               :key="header.id"
               :colspan="header.colSpan"
               :class="[
-                'relative',
+                'relative group',
                 header.column.getCanSort() && 'cursor-pointer select-none',
               ]"
               :style="{
                 width: `${header.getSize()}px`
               }"
-              @click="header.column.getToggleSortingHandler()"
+              @click="header.column.getToggleSortingHandler()?.($event)"
             >
               <template v-if="!header.isPlaceholder">
                 <div class="flex items-center gap-3">
@@ -26,74 +26,27 @@
                     :render="header.column.columnDef.header"
                     :props="header.getContext()"
                   />
-
-                  <svg
+                  <w-icon
                     v-if="
                       header.column.getCanSort() &&
                         header.column.getIsSorted() === 'asc'
                     "
-                    class="h-4 w-4"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke-width="1.5"
-                    stroke="currentColor"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="m4.5 15.75 7.5-7.5 7.5 7.5"
-                    />
-                  </svg>
-                  <svg
+                    name="radix:TriangleUpIcon"
+                    default-class="w-4 h-4"
+                  />
+                  <w-icon
                     v-else-if="
                       header.column.getCanSort() &&
                         header.column.getIsSorted() === 'desc'
                     "
-                    class="h-4 w-4"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke-width="1.5"
-                    stroke="currentColor"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="m19.5 8.25-7.5 7.5-7.5-7.5"
-                    />
-                  </svg>
-
-                  <svg
-                    v-else-if="
-                      header.column.getCanSort() && !header.column.getIsSorted()
-                    "
-                    class="h-4 w-4"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke-width="1.5"
-                    stroke="currentColor"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"
-                    />
-                  </svg>
+                    name="radix:TriangleDownIcon"
+                    default-class="w-4 h-4"
+                  />
                 </div>
               </template>
               <div
-                :class="['@apply absolute h-full w-[5px] cursor-col-resize select-none touch-none right-0 top-0 bg-primary hover:opacity-1', header.column.getIsResizing() ? 'isResizing' : '']"
-                :style="{
-                  transform:
-                    header.column.getIsResizing()
-                      ? `translateX(${
-                        table.getState().columnSizingInfo
-                          .deltaOffset
-                      }px)`
-                      : '',
-                }"
+                :data-isresizing="header.column.getIsResizing()"
+                :class="['@apply absolute translate-x-1/2 h-full w-[4px] cursor-col-resize select-none touch-none right-0 top-0 hover:opacity-1 data-[isresizing=true]:bg-primary']"
                 @mousedown="header.getResizeHandler()?.($event)"
                 @touchstart="header.getResizeHandler()?.($event)"
               />
@@ -102,6 +55,21 @@
         </WTableHeader>
 
         <WTableBody>
+          <WTableRow
+            v-for="row in table.getRowModel().rows"
+            :key="row.id"
+            :data-state="row.getIsSelected() ? 'selected' : ''"
+          >
+            <WTableCell
+              v-for="cell in row.getVisibleCells()"
+              :key="cell.id"
+            >
+              <FlexRender
+                :render="cell.column.columnDef.cell"
+                :props="cell.getContext()"
+              />
+            </WTableCell>
+          </WTableRow>
           <WTableRow
             v-for="row in table.getRowModel().rows"
             :key="row.id"
@@ -301,8 +269,8 @@
   </div>
 </template>
 
-<script lang="ts" setup generic="T">
-import CheckBox from "../checkbox/index.vue";
+<script lang="tsx" setup generic="T">
+import WCheckBox from "../checkbox/index.vue";
 import {
   FlexRender,
   getCoreRowModel,
@@ -349,11 +317,11 @@ defineOptions({ inheritAttrs: false });
 
 const checkBoxHeader: ColumnDef<any> = {
   id: "checkbox",
-  header: ({ table }) => {
+  header: ({ table, header }) => {
     return h(
       "div",
-      { class: "flex items-center justify-center" },
-      h(CheckBox, {
+      { class: "w-full flex items-center justify-center" },
+      h(WCheckBox, {
         checked: table.getIsAllRowsSelected()
           ? true
           : table.getIsSomeRowsSelected()
@@ -369,7 +337,7 @@ const checkBoxHeader: ColumnDef<any> = {
     return h(
       "div",
       { class: "flex items-center justify-center " },
-      h(CheckBox, {
+      h(WCheckBox, {
         checked: row.getIsSelected(),
         "onUpdate:checked": (value) => row.toggleSelected(!!value),
         ariaLabel: "Select row",

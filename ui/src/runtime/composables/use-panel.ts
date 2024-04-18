@@ -112,7 +112,7 @@ watchEffect(() => {
     spliterRef.value?.addPanel({
       pos: 'left',
       addPanel: markRaw(new SpliterPanel({
-        id: '--window-ui-splilter-flow-editor',
+        id: '--window-ui-splilter-default',
         hasHeader: false,
         tagEnable: false
       }))
